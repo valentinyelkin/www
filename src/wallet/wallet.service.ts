@@ -91,7 +91,7 @@ export class WalletService {
 
     await this.authService.usersRepository.save(updatedAmount);
 
-    // this.logger.debug('Called when the current second is 10');
+    this.logger.debug('Investor get a bonus - 1 percent of earnings daily');
   }
 
   @Cron('0 0 * * *', {
