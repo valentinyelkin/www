@@ -1,15 +1,15 @@
 import {
   Body,
   Controller,
-  Param,
   Post,
-  Req,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/startegy/jwt-auth.guard';
 import { WalletService } from './wallet.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Wallet operations')
 @Controller('wallet')
 export class WalletController {
   constructor(private readonly authService: WalletService) {}
