@@ -1,17 +1,10 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  Param,
-  Get,
-  Request,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { LocalAuthGuard } from './startegy/local-auth.guard';
-import { JwtAuthGuard } from './startegy/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth operations')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -25,18 +18,5 @@ export class AuthController {
   @Post('sign-up')
   async register(@Body() body: CreateAuthDto) {
     return await this.authService.createUser(body);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post(':id')
-  async invest(@Param('id') id: string, @Body() body: any) {
-    return await this.authService.invest(id, body);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    console.log(req.user, 'req');
-    return req.user;
   }
 }

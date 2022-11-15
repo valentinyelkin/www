@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import {IsEmail, IsNotEmpty, IsNumber, IsPositive} from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 @Entity()
 export class Users {
@@ -17,13 +17,16 @@ export class Users {
   role: string;
 
   @IsNumber()
-  @Column({ nullable: true })
+  @Column({ type: 'float', default: 0 })
   balance: number;
+
+  @IsNumber()
+  @Column({ type: 'float', default: 0 })
+  total_profit: number;
 
   @Column({ nullable: true })
   invite_code: string;
 
   @Column({ nullable: true })
-  @IsEmail()
-  inviteFrom: string[];
+  invite_from: number;
 }

@@ -20,8 +20,9 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "docker:run": "docker-compose up -d",
-    "migration:create": "typeorm migration:create ./src/migration/PostRefactoring",
-    "migration:run": "npx typeorm-ts-node-esm migration:run -d src/config/ormconfig.ts"
+    "migration:create": "typeorm migration:create ./src/migration/CreateInviteList",
+    "migration:run": "npx typeorm-ts-node-esm migration:run -d src/config/ormconfig.ts",
+    "migration:remove": "npx typeorm-ts-node-esm migration:run -d src/config/ormconfig.ts"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
