@@ -7,10 +7,12 @@ import { Users } from './entities/user.entity';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './startegy/jwt.strategy';
+import { WalletController } from '../wallet/wallet.controller';
+import { WalletService } from '../wallet/wallet.service';
 
 @Module({
-  controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  controllers: [AuthController, WalletController],
+  providers: [AuthService, LocalStrategy, JwtStrategy, WalletService],
   imports: [
     JwtModule.register({
       secret: process.env.PRIVATE_KEY || 'SECRET',

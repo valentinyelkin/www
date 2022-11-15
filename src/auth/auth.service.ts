@@ -17,7 +17,7 @@ export class AuthService {
   constructor(
     private jwtService: JwtService,
     @InjectRepository(Users)
-    private readonly usersRepository: Repository<Users>,
+    public readonly usersRepository: Repository<Users>,
   ) {}
 
   async login(userDTO: CreateAuthDto) {
@@ -46,47 +46,39 @@ export class AuthService {
 
     const hashPassword = await bcrypt.hash(body.password, 5);
 
+    // INVITE LOGIC
+    let userWhoInvite =
+      body?.invite &&
+      (await this.usersRepository.findOneBy({
+        invite_code: body.invite,
+      }));
+
+    if (body?.invite && !userWhoInvite) {
+      throw new HttpException('WRONG INVITE CODE', HttpStatus.BAD_REQUEST);
+    }
+
+    if (userWhoInvite) {
+      userWhoInvite = {
+        ...userWhoInvite,
+        invite_code: body.invite,
+      };
+
+      userWhoInvite && (await this.usersRepository.save(userWhoInvite));
+    }
+
     const user = await this.usersRepository.create({
       ...body,
       password: hashPassword,
       invite_code: `inv-${body.email}`,
       balance: 0,
       role: 'user',
+      invite_from: userWhoInvite?.id || null,
     });
 
     return await this.usersRepository.save(user);
   }
 
-  async invest(
-    id: string,
-    body: { balance: number },
-  ): Promise<Record<string, any>> {
-    if (body.balance < 0) {
-      throw new HttpException(
-        'Balance can`t be negative',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const user = await this.usersRepository.findOneBy({
-      id: +id,
-    });
-
-    if (!user) {
-      throw new NotFoundException(`User ${id} not found`);
-    }
-
-    const coffee = {
-      ...user,
-      id: +id,
-      balance: user.balance + body.balance,
-      role: 'investor',
-    };
-
-    return this.usersRepository.save(coffee);
-  }
-
-  async validateUser(body: CreateAuthDto) {
+  async validateUser(body: { password: string; email: string }) {
     const user = await this.usersRepository.findOneBy({
       email: body.email,
     });
