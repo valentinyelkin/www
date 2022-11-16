@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   Logger,
@@ -31,8 +32,8 @@ export class WalletService {
     id: string,
     body: { invest: number },
   ): Promise<Record<string, any>> {
-    if (body.invest < 0) {
-      throw new ConflictException('Balance can`t be negative');
+    if (body.invest < 0 || !body.invest) {
+      throw new ConflictException('Wrong data');
     }
 
     const user = await this.findUserById(id);
@@ -41,7 +42,7 @@ export class WalletService {
       ...user,
       id: +id,
       invite_code: `inv-${email}`,
-      balance: user.balance + body.invest,
+      balance: user?.balance ? user?.balance + body.invest : body.invest,
       role: UserRoles.INVESTOR,
     };
 
@@ -54,8 +55,10 @@ export class WalletService {
   ): Promise<Record<string, any>> {
     const user = await this.findUserById(id);
 
-    if (body.withdraw > user.balance) {
-      throw new ConflictException('Not enough money in the bonus account.');
+    console.log(body);
+
+    if (body.withdraw > user.balance || !body.withdraw) {
+      throw new BadRequestException('Not enough money in the bonus account.');
     }
 
     const updatedProfit = {

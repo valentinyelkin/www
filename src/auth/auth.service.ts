@@ -12,6 +12,7 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { Users } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRoles } from '../common/enums/roles.enum';
+import { ErrorMessages } from '../common/constants/constants';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +32,7 @@ export class AuthService {
     const isValid = bcrypt.compareSync(userDTO.password, user.password);
 
     if (!isValid) {
-      throw new NotFoundException(`Invalid credentials`);
+      throw new NotFoundException(ErrorMessages.INVALID_CRED);
     }
     return {
       access_token: this.generateToken(user),
@@ -42,7 +43,10 @@ export class AuthService {
     const findUser = await this.validateUser(body);
 
     if (findUser) {
-      throw new HttpException('email already in use', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        ErrorMessages.EMAIL_ALREADY_IN_USE,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const hashPassword = await bcrypt.hash(body.password, 5);
@@ -55,7 +59,10 @@ export class AuthService {
       }));
 
     if (body?.invite && !userWhoInvite) {
-      throw new HttpException('WRONG INVITE CODE', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        ErrorMessages.WRONG_INVITE_CODE,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (userWhoInvite) {

@@ -16,7 +16,7 @@ import { WalletService } from '../wallet/wallet.service';
   imports: [
     JwtModule.register({
       secret: process.env.PRIVATE_KEY || 'SECRET',
-      signOptions: { expiresIn: '32160s' },
+      signOptions: { expiresIn: process.env.EXPIRE_DATE || '1d' },
     }),
     TypeOrmModule.forFeature([Users]),
     PassportModule,
