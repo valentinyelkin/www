@@ -4,7 +4,7 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { LocalAuthGuard } from './startegy/local-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Auth operations')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

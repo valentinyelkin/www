@@ -7,7 +7,7 @@ import {
 import { Cron } from '@nestjs/schedule';
 import { AuthService } from '../auth/auth.service';
 import { IsNull, MoreThan, Not } from 'typeorm';
-import { UserRoles } from '../common/roles.enum';
+import { UserRoles } from '../common/enums/roles.enum';
 
 @Injectable()
 export class WalletService {
