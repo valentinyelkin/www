@@ -8,12 +8,13 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/startegy/jwt-auth.guard';
 import { WalletService } from './wallet.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { UserRoles } from '../common/enums/roles.enum';
 import { RolesGuard } from '../auth/roles/roles.guard';
 
 @ApiTags('Wallet operations')
+@ApiBearerAuth()
 @Controller('wallet')
 export class WalletController {
   constructor(private readonly authService: WalletService) {}

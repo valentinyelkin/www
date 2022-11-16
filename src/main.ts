@@ -20,6 +20,7 @@ async function bootstrap() {
     .setTitle('www')
     .setDescription('WWW application')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, options);

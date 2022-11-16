@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { Users } from './entities/user.entity';
+import { Users } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRoles } from '../common/enums/roles.enum';
 
@@ -21,7 +21,7 @@ export class AuthService {
     public readonly usersRepository: Repository<Users>,
   ) {}
 
-  async login(userDTO: CreateAuthDto) {
+  async login(userDTO: Omit<CreateAuthDto, 'invite'>) {
     const user = await this.validateUser(userDTO);
 
     if (!user) {
