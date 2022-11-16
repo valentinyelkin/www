@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   Request,
   UseGuards,
@@ -18,7 +19,8 @@ export class WalletController {
   @Post('/invest')
   async invest(@Request() req, @Body() body: any) {
     const userId = req.user.id;
-    return await this.authService.invest(userId, body);
+    const userEmail = req.user.email;
+    return await this.authService.invest(userEmail, userId, body);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -27,5 +29,17 @@ export class WalletController {
     const userId = req.user.id;
 
     return await this.authService.withdraw(userId, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/take_all')
+  async withdrawById(@Body() body: any) {
+    return await this.authService.withdrawByAll(body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/status')
+  async status() {
+    return await this.authService.status();
   }
 }
