@@ -20,10 +20,6 @@ export class Users {
   @Column({ type: 'float', default: 0 })
   balance: number;
 
-  @IsNumber()
-  @Column({ type: 'float', default: 0 })
-  total_profit: number;
-
   @Column({ nullable: true })
   invite_code: string;
 

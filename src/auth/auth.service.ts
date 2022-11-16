@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { Users } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UserRoles } from '../common/roles.enum';
 
 @Injectable()
 export class AuthService {
@@ -69,9 +70,8 @@ export class AuthService {
     const user = await this.usersRepository.create({
       ...body,
       password: hashPassword,
-      invite_code: `inv-${body.email}`,
       balance: 0,
-      role: 'user',
+      role: UserRoles.USER,
       invite_from: userWhoInvite?.id || null,
     });
 
