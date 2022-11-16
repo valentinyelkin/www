@@ -11,7 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { Users } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserRoles } from '../common/roles.enum';
+import { UserRoles } from '../common/enums/roles.enum';
 
 @Injectable()
 export class AuthService {
@@ -75,7 +75,10 @@ export class AuthService {
       invite_from: userWhoInvite?.id || null,
     });
 
-    return await this.usersRepository.save(user);
+    await this.usersRepository.save(user);
+    return {
+      access_token: this.generateToken(user),
+    };
   }
 
   async validateUser(body: { password: string; email: string }) {
@@ -91,7 +94,7 @@ export class AuthService {
   }
 
   private generateToken(user: Users) {
-    const payload = { id: user.id, email: user.email };
+    const payload = { id: user.id, email: user.email, roles: user.role };
     return this.jwtService.sign(payload);
   }
 }
