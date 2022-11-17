@@ -9,7 +9,7 @@ export default new DataSource({
   username: 'postgres',
   password: 'pass123',
   database: 'postgres',
-  entities: ['dist/**/*.entity.js'],
+  entities: ['src/**/*.entity.ts'],
   migrations: [join(__dirname, '../migrations/*.{t,j}s')],
   migrationsRun: true,
   synchronize: false,
