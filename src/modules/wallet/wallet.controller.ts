@@ -10,10 +10,9 @@ import { JwtAuthGuard } from '../auth/startegy/jwt-auth.guard';
 import { WalletService } from './wallet.service';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/decorator/roles.decorator';
-import { UserRoles } from '../common/enums/roles.enum';
+import { Role } from '../../common/enums/roles.enum';
 import { RolesGuard } from '../auth/roles/roles.guard';
-import { WithdrawDto } from '../auth/dto/withdraw.dto';
-import { InvestDto } from '../auth/dto/invest.dto';
+import { OperationDto } from '../auth/dto/operation.dto';
 
 @ApiTags('Wallet operations')
 @ApiBearerAuth()
@@ -23,18 +22,18 @@ export class WalletController {
 
   @ApiOperation({ summary: 'Invest money' })
   @ApiBody({
-    type: InvestDto,
+    type: OperationDto,
     description: 'Example for invest.',
     examples: {
       a: {
         summary: 'Request Body',
-        value: { invest: 1000 } as InvestDto,
+        value: { amount: 1000 } as OperationDto,
       },
     },
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('/invest')
-  @Roles(UserRoles.ADMIN, UserRoles.USER, UserRoles.INVESTOR)
+  @Roles(Role.ADMIN, Role.USER, Role.INVESTOR)
   async invest(@Request() req, @Body() body: any) {
     const userId = req.user.id;
     const userEmail = req.user.email;
@@ -43,18 +42,18 @@ export class WalletController {
 
   @ApiOperation({ summary: 'Withdraw money' })
   @ApiBody({
-    type: WithdrawDto,
+    type: OperationDto,
     description: 'Example for withdraw.',
     examples: {
       a: {
         summary: 'Request Body',
-        value: { withdraw: 1000 } as WithdrawDto,
+        value: { amount: 1000 } as OperationDto,
       },
     },
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('/withdraw')
-   // @Roles(UserRoles.INVESTOR, UserRoles.ADMIN)
+  @Roles(Role.INVESTOR, Role.ADMIN)
   async withdraw(@Request() req, @Body() body: any) {
     const userId = req.user.id;
 
@@ -63,25 +62,25 @@ export class WalletController {
 
   @ApiOperation({ summary: 'Withdraw any count money: only for ADMIN role' })
   @ApiBody({
-    type: WithdrawDto,
+    type: OperationDto,
     description: 'Example for withdraw.',
     examples: {
       a: {
         summary: 'Request Body',
-        value: { withdraw: 1000 } as WithdrawDto,
+        value: { amount: 1000 } as OperationDto,
       },
     },
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('/take_all')
-  @Roles(UserRoles.ADMIN)
-  async withdrawById(@Body() body: any) {
+  @Roles(Role.ADMIN)
+  async withdrawByAll(@Body() body: any) {
     return await this.authService.withdrawByAll(body);
   }
   @ApiOperation({ summary: 'ADMIN can see current status' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('/status')
-  @Roles(UserRoles.ADMIN)
+  @Roles(Role.ADMIN)
   async status() {
     return await this.authService.status();
   }

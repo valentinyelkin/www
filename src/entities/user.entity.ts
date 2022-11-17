@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { IsNotEmpty, IsNumber } from 'class-validator';
-import { UserRoles } from '../common/enums/roles.enum';
+import { Role } from '../common/enums/roles.enum';
 
 @Entity()
 export class Users {
@@ -14,8 +14,8 @@ export class Users {
   @IsNotEmpty()
   password: string;
 
-  @Column({ type: 'enum', enum: UserRoles, default: UserRoles.USER })
-  role: UserRoles;
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  role: Role;
 
   @IsNumber()
   @Column({ type: 'float', default: 0 })

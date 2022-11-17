@@ -9,10 +9,10 @@ import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { Users } from '../entities/user.entity';
+import { Users } from '../../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserRoles } from '../common/enums/roles.enum';
-import { ErrorMessages } from '../common/constants/constants';
+import { Role } from '../../common/enums/roles.enum';
+import { ErrorMessages } from '../../common/constants/constants';
 
 @Injectable()
 export class AuthService {
@@ -78,7 +78,7 @@ export class AuthService {
       ...body,
       password: hashPassword,
       balance: 0,
-      role: UserRoles.USER,
+      role: Role.USER,
       invite_from: userWhoInvite?.id || null,
     });
 
@@ -101,7 +101,7 @@ export class AuthService {
   }
 
   private generateToken(user: Users) {
-    const payload = { id: user.id, email: user.email, roles: user.role };
+    const payload = { id: user.id, email: user.email };
     return this.jwtService.sign(payload);
   }
 }
