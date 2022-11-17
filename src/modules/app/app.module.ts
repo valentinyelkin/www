@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './modules/auth/auth.module';
-import { LoggerService } from './logger/logger.service';
-import { LoggerModule } from './logger/logger.module';
-import appConfig from './config/app.config';
+import { AuthModule } from '../auth/auth.module';
+import { LoggerService } from '../../logger/logger.service';
+import { LoggerModule } from '../../logger/logger.module';
+import appConfig from '../../config/app.config';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
@@ -31,6 +30,6 @@ import { ScheduleModule } from '@nestjs/schedule';
     LoggerModule,
   ],
   controllers: [AppController],
-  providers: [AppService, LoggerService],
+  providers: [LoggerService],
 })
 export class AppModule {}

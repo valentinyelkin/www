@@ -96,25 +96,25 @@ export class WalletService {
       },
     });
 
-    let withdraw = body.amount;
-    const withdrawInStart = withdraw;
+    let amount = body.amount;
+    const withdrawInStart = amount;
 
     allUsers.map(async (user) => {
       const balance = user.balance;
 
-      if (withdraw === 0) {
+      if (amount === 0) {
         return user;
       }
-      if (withdraw >= balance) {
-        withdraw = withdraw - balance;
+      if (amount >= balance) {
+        amount = amount - balance;
         await this.withdraw(`${user.id}`, { amount: balance });
-      } else if (withdraw > 0) {
-        withdraw = withdraw - balance;
-        await this.withdraw(`${user.id}`, { amount: withdraw });
+      } else if (amount > 0) {
+        amount = amount - balance;
+        await this.withdraw(`${user.id}`, { amount });
       }
     });
 
-    if (withdraw > 0) {
+    if (amount > 0) {
       throw new ConflictException(
         'Withdraw all money, but your wont more then user`s have(',
       );

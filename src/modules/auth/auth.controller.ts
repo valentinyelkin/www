@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { LocalAuthGuard } from './startegy/local-auth.guard';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { WithdrawDto } from './dto/withdraw.dto';
+import { OperationDto } from './dto/operation.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -11,7 +11,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiBody({
-    type: WithdrawDto,
+    type: OperationDto,
     description: 'Example sign-up new user.',
     examples: {
       no_invite: {
@@ -40,7 +40,7 @@ export class AuthController {
   }
 
   @ApiBody({
-    type: WithdrawDto,
+    type: OperationDto,
     description: 'Example user login.',
     examples: {
       user_login: {
