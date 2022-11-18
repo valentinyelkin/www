@@ -32,19 +32,5 @@ $ npm run migration:run
 $ npm run seeds:run
 ```
 
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
 ## Api
-
-[Link to API](http://localhost:3000/api)
+[Link to swagger API](http://localhost:3000/api)
