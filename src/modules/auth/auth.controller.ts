@@ -40,7 +40,7 @@ export class AuthController {
   }
 
   @ApiBody({
-    type: OperationDto,
+    type: CreateAuthDto,
     description: 'Example user login.',
     examples: {
       user_login: {
