@@ -9,6 +9,7 @@ import { Role } from '../../common/enums/roles.enum';
 import { OperationDto } from '../auth/dto/operation.dto';
 import { ErrorMessages } from '../../common/constants/error.messages';
 import { MoreThan } from 'typeorm';
+import { StatusDto } from './dto/status.dto';
 
 @Injectable()
 export class WalletService {
@@ -67,8 +68,6 @@ export class WalletService {
   ): Promise<Record<string, any>> {
     const user = await this.findUserById(id);
 
-    console.log(body.amount);
-
     const newBalance = user.balance - body.amount;
 
     await this.authService.usersRepository.update(user.id, {
@@ -84,12 +83,13 @@ export class WalletService {
     );
   }
 
-  async status(): Promise<string> {
+  async status(): Promise<StatusDto> {
     const allUsers = await this.authService.usersRepository.find();
     let statistic = {
       total_users: 0,
       total_balance: 0,
       total_investors: 0,
+      total_inviters: 0,
     };
 
     allUsers.map(async (user) => {
@@ -100,15 +100,16 @@ export class WalletService {
           user.role === 'investor'
             ? statistic.total_investors + 1
             : statistic.total_investors,
+        total_inviters: user.invite_from
+          ? statistic.total_inviters + 1
+          : statistic.total_inviters,
       };
     });
 
-    return JSON.parse(
-      JSON.stringify({
-        ...statistic,
-        total_users: allUsers.length,
-      }),
-    );
+    return {
+      ...statistic,
+      total_users: allUsers.length,
+    };
   }
 
   async withdrawByAll(body: { amount: number }): Promise<string> {
