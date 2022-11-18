@@ -1,7 +1,7 @@
 import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { LocalAuthGuard } from './startegy/local-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OperationDto } from './dto/operation.dto';
 

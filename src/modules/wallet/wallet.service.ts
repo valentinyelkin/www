@@ -7,6 +7,8 @@ import {
 import { AuthService } from '../auth/auth.service';
 import { Role } from '../../common/enums/roles.enum';
 import { OperationDto } from '../auth/dto/operation.dto';
+import { ErrorMessages } from '../../common/constants/error.messages';
+import { MoreThan } from 'typeorm';
 
 @Injectable()
 export class WalletService {
@@ -18,14 +20,23 @@ export class WalletService {
     });
 
     if (!user) {
-      throw new NotFoundException(`User ${id} not found`);
+      throw new NotFoundException(ErrorMessages.NOT_FOUND);
     }
     return user;
   }
 
+  async getAllInvestors() {
+    return await this.authService.usersRepository.find({
+      where: {
+        role: Role.INVESTOR,
+        balance: MoreThan(0),
+      },
+    });
+  }
+
   async invest(email, id: string, body: OperationDto): Promise<string> {
     if (body.amount < 0 || !body.amount) {
-      throw new ConflictException('Wrong data');
+      throw new ConflictException(ErrorMessages.WRONG_DATA);
     }
 
     const user = await this.findUserById(id);
@@ -40,7 +51,14 @@ export class WalletService {
       balance: updateBalance,
       role: updateRole,
     });
-    return `You successfully invest: ${body.amount}`;
+
+    return JSON.parse(
+      JSON.stringify({
+        status: 201,
+        msg: `You successfully invest: ${body.amount}`,
+        balance: updateBalance,
+      }),
+    );
   }
 
   async withdraw(
@@ -49,17 +67,21 @@ export class WalletService {
   ): Promise<Record<string, any>> {
     const user = await this.findUserById(id);
 
-    if (body.amount > user.balance || !body.amount) {
-      throw new BadRequestException('Not enough money in account.');
-    }
+    console.log(body.amount);
 
-    const updatedProfit = {
-      ...user,
-      id: +id,
-      balance: user.balance - body.amount,
-    };
+    const newBalance = user.balance - body.amount;
 
-    return this.authService.usersRepository.save(updatedProfit);
+    await this.authService.usersRepository.update(user.id, {
+      balance: newBalance,
+    });
+
+    return JSON.parse(
+      JSON.stringify({
+        status: 201,
+        msg: `You successfully withdraw: ${body.amount}`,
+        balance: newBalance,
+      }),
+    );
   }
 
   async status(): Promise<string> {
@@ -90,36 +112,44 @@ export class WalletService {
   }
 
   async withdrawByAll(body: { amount: number }): Promise<string> {
-    const allUsers = await this.authService.usersRepository.find({
+    let { amount } = body;
+    const withdrawInStart = amount;
+
+    const allInvestors = await this.authService.usersRepository.find({
       where: {
         role: Role.INVESTOR,
       },
     });
 
-    let amount = body.amount;
-    const withdrawInStart = amount;
+    const investorsBalance = allInvestors.reduce(
+      (suma, user) => suma + user.balance,
+      0,
+    );
 
-    allUsers.map(async (user) => {
-      const balance = user.balance;
+    if (investorsBalance < amount) {
+      throw new BadRequestException(ErrorMessages.NOT_ENOUGH);
+    }
+
+    allInvestors.map(async (user) => {
+      const { balance, id } = user;
 
       if (amount === 0) {
         return user;
       }
       if (amount >= balance) {
         amount = amount - balance;
-        await this.withdraw(`${user.id}`, { amount: balance });
+        await this.withdraw(`${id}`, { amount: balance });
       } else if (amount > 0) {
-        amount = amount - balance;
-        await this.withdraw(`${user.id}`, { amount });
+        await this.withdraw(`${id}`, { amount });
+        amount = 0;
       }
     });
 
-    if (amount > 0) {
-      throw new ConflictException(
-        'Withdraw all money, but your wont more then user`s have(',
-      );
-    }
-
-    return `Withdraw amount: ${withdrawInStart}`;
+    return JSON.parse(
+      JSON.stringify({
+        status: 201,
+        msg: `You successfully withdraw: ${withdrawInStart}`,
+      }),
+    );
   }
 }

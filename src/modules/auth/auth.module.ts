@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from '../../entities/user.entity';
 import { PassportModule } from '@nestjs/passport';
-import { LocalStrategy } from './local.strategy';
+import { LocalStrategy } from './startegy/local.strategy';
 import { JwtStrategy } from './startegy/jwt.strategy';
 import { WalletController } from '../wallet/wallet.controller';
 import { WalletService } from '../wallet/wallet.service';
@@ -23,7 +23,7 @@ import { CronService } from '../../cron/cron.service';
   imports: [
     JwtModule.register({
       secret: process.env.PRIVATE_KEY || 'SECRET',
-      signOptions: { expiresIn: process.env.EXPIRE_DATE || '1d' },
+      signOptions: { expiresIn: process.env.EXPIRE_DATE || '30d' },
     }),
     TypeOrmModule.forFeature([Users]),
     PassportModule,

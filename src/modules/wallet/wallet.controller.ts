@@ -6,7 +6,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/startegy/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { WalletService } from './wallet.service';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/decorator/roles.decorator';
@@ -15,6 +15,7 @@ import { RolesGuard } from '../auth/roles/roles.guard';
 import { OperationDto } from '../auth/dto/operation.dto';
 
 @ApiTags('Wallet operations')
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 @Controller('wallet')
 export class WalletController {
@@ -31,7 +32,6 @@ export class WalletController {
       },
     },
   })
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('/invest')
   @Roles(Role.ADMIN, Role.USER, Role.INVESTOR)
   async invest(@Request() req, @Body() body: any) {
@@ -51,7 +51,6 @@ export class WalletController {
       },
     },
   })
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('/withdraw')
   @Roles(Role.INVESTOR, Role.ADMIN)
   async withdraw(@Request() req, @Body() body: any) {
@@ -71,14 +70,12 @@ export class WalletController {
       },
     },
   })
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('/take_all')
   @Roles(Role.ADMIN)
   async withdrawByAll(@Body() body: any) {
     return await this.authService.withdrawByAll(body);
   }
   @ApiOperation({ summary: 'ADMIN can see current status' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('/status')
   @Roles(Role.ADMIN)
   async status() {

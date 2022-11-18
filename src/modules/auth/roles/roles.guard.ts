@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { Role } from '../../../common/enums/roles.enum';
 import { ROLES_KEY } from '../decorator/roles.decorator';
 import { AuthService } from '../auth.service';
+import { MoreThan } from 'typeorm';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -18,8 +19,12 @@ export class RolesGuard implements CanActivate {
     }
     const { user } = context.switchToHttp().getRequest();
 
-    const userById = await this.authService.usersRepository.findOneBy(user.id);
+    const userById = await this.authService.usersRepository.find({
+      where: {
+        email: user.email,
+      },
+    });
 
-    return requiredRoles.some((role) => userById?.role?.includes(role));
+    return requiredRoles.some((role) => userById[0]?.role?.includes(role));
   }
 }

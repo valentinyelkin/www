@@ -12,7 +12,7 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { Users } from '../../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from '../../common/enums/roles.enum';
-import { ErrorMessages } from '../../common/constants/constants';
+import { ErrorMessages } from '../../common/constants/error.messages';
 
 @Injectable()
 export class AuthService {

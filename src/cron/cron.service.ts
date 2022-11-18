@@ -3,39 +3,41 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { Role } from '../common/enums/roles.enum';
 import { IsNull, MoreThan, Not } from 'typeorm';
 import { AuthService } from '../modules/auth/auth.service';
+import {
+  getBonusesPercent,
+  getTenPercent,
+  onePercent,
+} from '../common/helpers/wallet.operations';
+import { WalletService } from '../modules/wallet/wallet.service';
 
 @Injectable()
 export class CronService {
   private readonly logger = new Logger(CronService.name);
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly walletService: WalletService,
+  ) {}
 
-  async purchaseOnePercent() {
-    const walletsWithDeposits = await this.authService.usersRepository.find({
-      where: {
-        role: Role.INVESTOR,
-        balance: MoreThan(0),
-      },
-    });
+  async getOnePercent() {
+    const walletsWithDeposits = await this.walletService.getAllInvestors();
 
     for (const wallet of walletsWithDeposits) {
       await this.authService.usersRepository.update(wallet.id, {
-        balance: wallet.balance + wallet.balance / 100,
+        balance: onePercent(wallet.balance),
       });
     }
 
     this.logger.debug('Investor get a bonus - 1 percent of earnings daily');
   }
 
-  async walletInvitePercent() {
+  async getTenPercent() {
     const walletsWithDeposits = await this.authService.usersRepository.find({
       where: {
-        role: Role.INVESTOR,
+        role: Role.INVESTOR || Role.ADMIN,
         invite_from: Not(IsNull()),
       },
     });
-
-    const updatedBalance = [];
 
     for (const wallet of walletsWithDeposits) {
       const userBalanceUpdate =
@@ -44,25 +46,22 @@ export class CronService {
         });
 
       if (userBalanceUpdate && wallet.balance > 0) {
-        const dailyBonus = wallet.balance / 101;
-        const tenPercent = (dailyBonus / 100) * 10;
+        const dailyBonus = getBonusesPercent(wallet.balance);
+        const tenPercent = getTenPercent(dailyBonus);
 
-        const updatedAmount = {
-          ...userBalanceUpdate,
+        await this.authService.usersRepository.update(userBalanceUpdate.id, {
           balance: userBalanceUpdate.balance + tenPercent,
-        };
-        updatedBalance.push(updatedAmount);
+        });
       }
-      await this.authService.usersRepository.save(updatedBalance);
     }
     this.logger.debug("Get a bonus - 10 percent of invitee's earnings daily");
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, {
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, {
     timeZone: 'Europe/Kiev',
   })
   async walletPercent() {
-    await this.purchaseOnePercent();
-    await this.walletInvitePercent();
+    await this.getOnePercent();
+    await this.getTenPercent();
   }
 }
