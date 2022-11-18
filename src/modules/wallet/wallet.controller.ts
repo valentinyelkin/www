@@ -2,7 +2,8 @@ import {
   Body,
   Controller,
   Get,
-  Post,
+  Post, Query,
+  Render,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -11,13 +12,15 @@ import { WalletService } from './wallet.service';
 import {
   ApiBearerAuth,
   ApiBody,
-  ApiOperation,
+  ApiOperation, ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { Role } from '../../common/enums/roles.enum';
 import { RolesGuard } from '../auth/roles/roles.guard';
 import { OperationDto } from '../auth/dto/operation.dto';
+import { StatusDto } from './dto/status.dto';
 
 @ApiTags('Wallet operations')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -80,9 +83,14 @@ export class WalletController {
   async withdrawByAll(@Body() body: any) {
     return await this.authService.withdrawByAll(body);
   }
+
+  @ApiResponse({
+    type: StatusDto,
+  })
   @ApiOperation({ summary: 'ADMIN can see current status' })
   @Get('/status')
   @Roles(Role.ADMIN)
+  @Render('index')
   async status() {
     return await this.authService.status();
   }

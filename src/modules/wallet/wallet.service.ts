@@ -92,6 +92,10 @@ export class WalletService {
       total_inviters: 0,
     };
 
+    if (!allUsers) {
+      throw new NotFoundException();
+    }
+
     allUsers.map(async (user) => {
       statistic = {
         ...statistic,
@@ -128,7 +132,7 @@ export class WalletService {
     );
 
     if (investorsBalance < amount) {
-      throw new BadRequestException(ErrorMessages.NOT_ENOUGH);
+      throw new NotFoundException(ErrorMessages.NOT_FOUND_USERS);
     }
 
     allInvestors.map(async (user) => {
