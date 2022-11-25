@@ -7,6 +7,7 @@ import { LoggerService } from '../../logger/logger.service';
 import { LoggerModule } from '../../logger/logger.module';
 import appConfig from '../../config/app.config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ScheduleModule.forRoot(),
     AuthModule,
     LoggerModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [LoggerService],

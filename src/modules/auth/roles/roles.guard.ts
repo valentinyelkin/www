@@ -2,12 +2,14 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '../../../common/enums/roles.enum';
 import { ROLES_KEY } from '../decorator/roles.decorator';
-import { AuthService } from '../auth.service';
-import { MoreThan } from 'typeorm';
+import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector, private authService: AuthService) {}
+  constructor(
+    private reflector: Reflector,
+    private userService: UsersService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
@@ -19,7 +21,7 @@ export class RolesGuard implements CanActivate {
     }
     const { user } = context.switchToHttp().getRequest();
 
-    const userById = await this.authService.usersRepository.find({
+    const userById = await this.userService.findWhere({
       where: {
         email: user.email,
       },

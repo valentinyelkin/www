@@ -1,21 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Role } from '../common/enums/roles.enum';
-import { IsNull, MoreThan, Not } from 'typeorm';
-import { AuthService } from '../modules/auth/auth.service';
+import { IsNull, Not } from 'typeorm';
 import {
   getBonusesPercent,
   getTenPercent,
   onePercent,
 } from '../common/helpers/wallet.operations';
 import { WalletService } from '../modules/wallet/wallet.service';
+import { UsersService } from '../modules/users/users.service';
 
 @Injectable()
 export class CronService {
   private readonly logger = new Logger(CronService.name);
 
   constructor(
-    private readonly authService: AuthService,
+    private readonly userService: UsersService,
     private readonly walletService: WalletService,
   ) {}
 
@@ -23,7 +23,7 @@ export class CronService {
     const walletsWithDeposits = await this.walletService.getAllInvestors();
 
     for (const wallet of walletsWithDeposits) {
-      await this.authService.usersRepository.update(wallet.id, {
+      await this.userService.updateById(wallet.id, {
         balance: onePercent(wallet.balance),
       });
     }
@@ -32,7 +32,7 @@ export class CronService {
   }
 
   async getTenPercent() {
-    const walletsWithDeposits = await this.authService.usersRepository.find({
+    const walletsWithDeposits = await this.userService.findWhere({
       where: {
         role: Role.INVESTOR || Role.ADMIN,
         invite_from: Not(IsNull()),
@@ -40,16 +40,15 @@ export class CronService {
     });
 
     for (const wallet of walletsWithDeposits) {
-      const userBalanceUpdate =
-        await this.authService.usersRepository.findOneBy({
-          id: wallet.invite_from,
-        });
+      const userBalanceUpdate = await this.userService.findOneBy({
+        id: wallet.invite_from,
+      });
 
       if (userBalanceUpdate && wallet.balance > 0) {
         const dailyBonus = getBonusesPercent(wallet.balance);
         const tenPercent = getTenPercent(dailyBonus);
 
-        await this.authService.usersRepository.update(userBalanceUpdate.id, {
+        await this.userService.updateById(userBalanceUpdate.id, {
           balance: userBalanceUpdate.balance + tenPercent,
         });
       }

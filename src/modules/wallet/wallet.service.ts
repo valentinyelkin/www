@@ -1,22 +1,22 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AuthService } from '../auth/auth.service';
 import { Role } from '../../common/enums/roles.enum';
 import { OperationDto } from '../auth/dto/operation.dto';
 import { ErrorMessages } from '../../common/constants/error.messages';
 import { MoreThan } from 'typeorm';
 import { StatusDto } from './dto/status.dto';
+import { UsersService } from '../users/users.service';
+import { Users } from '../../entities/user.entity';
 
 @Injectable()
 export class WalletService {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly userService: UsersService) {}
 
   async findUserById(id) {
-    const user = await this.authService.usersRepository.findOneBy({
+    const user = await this.userService.findOneBy({
       id: +id,
     });
 
@@ -26,8 +26,8 @@ export class WalletService {
     return user;
   }
 
-  async getAllInvestors() {
-    return await this.authService.usersRepository.find({
+  async getAllInvestors(): Promise<Users[]> {
+    return await this.userService.findWhere({
       where: {
         role: Role.INVESTOR,
         balance: MoreThan(0),
@@ -47,7 +47,7 @@ export class WalletService {
       : body.amount;
     const updateRole = user.role === Role.ADMIN ? Role.ADMIN : Role.INVESTOR;
 
-    await this.authService.usersRepository.update(user.id, {
+    await this.userService.updateById(user.id, {
       invite_code: `inv-${email}`,
       balance: updateBalance,
       role: updateRole,
@@ -70,9 +70,7 @@ export class WalletService {
 
     const newBalance = user.balance - body.amount;
 
-    await this.authService.usersRepository.update(user.id, {
-      balance: newBalance,
-    });
+    await this.userService.updateById(user.id, { balance: newBalance });
 
     return JSON.parse(
       JSON.stringify({
@@ -84,7 +82,7 @@ export class WalletService {
   }
 
   async status(): Promise<StatusDto> {
-    const allUsers = await this.authService.usersRepository.find();
+    const allUsers = await this.userService.findAll();
     let statistic = {
       total_users: 0,
       total_balance: 0,
@@ -120,7 +118,7 @@ export class WalletService {
     let { amount } = body;
     const withdrawInStart = amount;
 
-    const allInvestors = await this.authService.usersRepository.find({
+    const allInvestors = await this.userService.findWhere({
       where: {
         role: Role.INVESTOR,
       },

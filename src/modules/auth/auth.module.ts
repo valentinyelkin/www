@@ -10,6 +10,7 @@ import { JwtStrategy } from './startegy/jwt.strategy';
 import { WalletController } from '../wallet/wallet.controller';
 import { WalletService } from '../wallet/wallet.service';
 import { CronService } from '../../cron/cron.service';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   controllers: [AuthController, WalletController],
@@ -27,6 +28,7 @@ import { CronService } from '../../cron/cron.service';
     }),
     TypeOrmModule.forFeature([Users]),
     PassportModule,
+    UsersModule,
   ],
   exports: [AuthService],
 })

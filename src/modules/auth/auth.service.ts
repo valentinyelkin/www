@@ -5,53 +5,27 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { Users } from '../../entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 import { ErrorMessages } from '../../common/constants/error.messages';
+import { UsersService } from '../users/users.service';
+import { Users } from '../../entities/user.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    @InjectRepository(Users)
-    public readonly usersRepository: Repository<Users>,
+    private userService: UsersService,
   ) {}
 
-  async validateUser(body: { password: string; email: string }) {
-    const user = await this.usersRepository.findOneBy({
-      email: body.email,
-    });
-
-    if (user) {
-      return user;
-    }
-
-    return null;
-  }
-
-  async findUserByInvite(invite): Promise<number> {
-    const userWhoInvite =
-      invite &&
-      (await this.usersRepository.findOneBy({
-        invite_code: invite,
-      }));
-
-    if (invite && !userWhoInvite) {
-      throw new HttpException(
-        ErrorMessages.WRONG_INVITE_CODE,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    return userWhoInvite.id;
+  generateToken(user: Users) {
+    const payload = { id: user.id, email: user.email };
+    return this.jwtService.sign(payload);
   }
 
   async login(userDTO: Omit<CreateAuthDto, 'invite'>) {
-    const user = await this.validateUser(userDTO);
+    const user = await this.userService.validateUser(userDTO);
 
     if (!user) {
       throw new UnauthorizedException();
@@ -75,7 +49,7 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const findUser = await this.validateUser(body);
+    const findUser = await this.userService.validateUser(body);
 
     if (findUser) {
       throw new HttpException(
@@ -85,23 +59,16 @@ export class AuthService {
     }
 
     const hashPassword = await bcrypt.hash(body.password, 5);
-    const userInviteId = await this.findUserByInvite(body.invite);
+    const userInviteId = await this.userService.findUserByInvite(body.invite);
 
-    const user = await this.usersRepository.create({
-      ...body,
-      password: hashPassword,
-      invite_from: userInviteId || null,
-    });
-
-    await this.usersRepository.save(user);
+    const user = await this.userService.createUser(
+      body,
+      hashPassword,
+      userInviteId,
+    );
 
     return {
       access_token: this.generateToken(user),
     };
-  }
-
-  private generateToken(user: Users) {
-    const payload = { id: user.id, email: user.email };
-    return this.jwtService.sign(payload);
   }
 }
